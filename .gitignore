@@ -1,0 +1,12 @@
+# Dependencias instaladas por npm
+/node_modules/
+
+# CSS generado automáticamente por Tailwind
+/public/assets/css/app.css
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Archivos locales o sensibles
+.env

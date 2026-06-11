@@ -1,0 +1,26 @@
+
+
+
+
+
+
+npm install -D tailwindcss postcss autoprefixer
+
+npx tailwindcss init -p
+
+npm install -D tailwindcss@3.4.17 postcss autoprefixer
+
+npx tailwindcss@3.4.17 init -p
+
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    "./resources/views/**/*.php",
+    "./resources/js/**/*.js",
+    "./public/**/*.php"
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
