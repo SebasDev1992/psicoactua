@@ -10,3 +10,4 @@ require_once __DIR__ . '/../app/controllers/AuthController.php';
 $router->get('/', [HomeController::class, 'index']);
 
 $router->get('/login', [AuthController::class, 'showLogin']);
+$router->post('/login', [AuthController::class, 'login']);

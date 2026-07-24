@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Vista pública de inicio de sesión.
  *
@@ -7,6 +6,16 @@
  * En el siguiente paso conectaremos el formulario
  * con el controlador y la base de datos.
  */
+?>
+<?php
+/**
+ * Recupera los mensajes temporales enviados por el controlador.
+ * Después de leerlos, se eliminan de la sesión.
+ */
+$errors = $_SESSION['login_errors'] ?? [];
+$oldEmail = $_SESSION['old_email'] ?? '';
+
+unset($_SESSION['login_errors'], $_SESSION['old_email']);
 ?>
 
 <!DOCTYPE html>
@@ -78,6 +87,25 @@
                     method="POST"
                     class="space-y-5"
                 >
+                <?php if ($errors !== []): ?>
+                    <div
+                        role="alert"
+                        class="rounded-xl border border-red-200
+                        bg-red-50 px-4 py-3 text-sm text-red-700"
+                    >
+                        <p class="font-semibold">
+                            No fue posible iniciar sesión:
+                        </p>
+
+                        <ul class="mt-2 list-disc space-y-1 pl-5">
+                            <?php foreach ($errors as $error): ?>
+                                <li>
+                                    <?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?>
+                                </li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+                <?php endif; ?>
                     <div>
                         <label
                             for="email"
@@ -90,14 +118,15 @@
                             type="email"
                             id="email"
                             name="email"
+                            value="<?= htmlspecialchars($oldEmail, ENT_QUOTES, 'UTF-8') ?>"
                             autocomplete="email"
                             placeholder="correo@ejemplo.com"
                             required
                             class="w-full rounded-xl border border-slate-300
-                                   bg-white px-4 py-3 text-slate-900
-                                   outline-none transition
-                                   focus:border-cyan-600
-                                   focus:ring-4 focus:ring-cyan-100"
+                            bg-white px-4 py-3 text-slate-900
+                            outline-none transition
+                            focus:border-cyan-600
+                            focus:ring-4 focus:ring-cyan-100"
                         >
                     </div>
 
@@ -117,10 +146,10 @@
                             placeholder="Ingresa tu contraseña"
                             required
                             class="w-full rounded-xl border border-slate-300
-                                   bg-white px-4 py-3 text-slate-900
-                                   outline-none transition
-                                   focus:border-cyan-600
-                                   focus:ring-4 focus:ring-cyan-100"
+                            bg-white px-4 py-3 text-slate-900
+                            outline-none transition
+                            focus:border-cyan-600
+                            focus:ring-4 focus:ring-cyan-100"
                         >
                     </div>
 

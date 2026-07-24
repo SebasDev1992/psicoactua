@@ -8,6 +8,13 @@ class Router
     {
         $this->routes['GET'][$path] = $action;
     }
+    /**
+     * Registra una ruta que recibe solicitudes POST.
+     */
+    public function post(string $path, callable|array $action): void
+    {
+        $this->routes['POST'][$path] = $action;
+    }
 
     public function dispatch(string $method, string $uri): void
     {

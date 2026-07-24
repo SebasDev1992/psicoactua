@@ -1,5 +1,11 @@
 <?php
-
+/**
+ * Inicia la sesión para conservar la autenticación
+ * del usuario entre diferentes páginas.
+ */
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 /**
  * Punto de entrada principal de PsicoActúa.
  *
