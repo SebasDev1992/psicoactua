@@ -10,3 +10,6 @@ Thumbs.db
 
 # Archivos locales o sensibles
 .env
+
+# Configuración local de la base de datos
+/config/database.php
