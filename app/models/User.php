@@ -47,4 +47,45 @@ class User extends Model
     {
         return $this->findByEmail($email) !== null;
     }
+    /**
+     * Registra un nuevo usuario en la base de datos.
+     *
+     * @return int ID del usuario creado.
+     */
+    public function create(array $data): int
+    {
+        $query = '
+            INSERT INTO users (
+                id_rol,
+                nom,
+                ape,
+                email,
+                password,
+                tel,
+                estado
+            ) VALUES (
+                :role_id,
+                :name,
+                :last_name,
+                :email,
+                :password,
+                :phone,
+                :status
+            )
+        ';
+
+        $statement = $this->database->prepare($query);
+
+        $statement->execute([
+            'role_id' => $data['role_id'],
+            'name' => $data['name'],
+            'last_name' => $data['last_name'],
+            'email' => $data['email'],
+            'password' => $data['password'],
+            'phone' => $data['phone'],
+            'status' => $data['status'],
+        ]);
+
+        return (int) $this->database->lastInsertId();
+    }
 }
