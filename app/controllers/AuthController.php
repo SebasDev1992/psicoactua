@@ -104,8 +104,7 @@ class AuthController
             'email' => $email,
         ];
 
-        header('Location: /');
-        exit;
+        $this->redirectByRole(3);
     }
 
     /**
@@ -176,8 +175,7 @@ class AuthController
             'email' => $user['email'],
         ];
 
-        header('Location: /');
-        exit;
+        $this->redirectByRole((int) $user['id_rol']);
     }
     /**
      * Cierra la sesión del usuario y lo redirige al login.
@@ -203,6 +201,20 @@ class AuthController
         session_destroy();
 
         header('Location: /login');
+        exit;
+    }
+    /**
+     * Redirige al usuario al panel correspondiente según su rol.
+     */
+    private function redirectByRole(int $roleId): void
+    {
+        $routes = [
+            1 => '/administrador',
+            2 => '/psicologo',
+            3 => '/paciente',
+        ];
+
+        header('Location: ' . ($routes[$roleId] ?? '/'));
         exit;
     }
 }

@@ -1,9 +1,11 @@
 <?php
+require_once __DIR__ . '/../middleware/AuthMiddleware.php';
 
 class HomeController
 {
     public function index()
     {
+        AuthMiddleware::handle();
         $title = 'Inicio | Psico Actúa';
 
         ob_start();
