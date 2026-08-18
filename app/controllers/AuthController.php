@@ -26,6 +26,7 @@ class AuthController
      */
     public function register(): void
     {
+        // Normaliza la entrada antes de aplicar las reglas del registro.
         $name = trim($_POST['name'] ?? '');
         $lastName = trim($_POST['last_name'] ?? '');
         $email = strtolower(trim($_POST['email'] ?? ''));
@@ -64,6 +65,7 @@ class AuthController
             $errors[] = 'Debes aceptar la política de privacidad.';
         }
 
+        // El modelo concentra la consulta que evita correos duplicados.
         $userModel = new User();
 
         if ($email !== '' && $userModel->emailExists($email)) {
@@ -71,6 +73,7 @@ class AuthController
         }
 
         if ($errors !== []) {
+            // Conserva solo datos no sensibles para volver a mostrar el formulario.
             $_SESSION['register_errors'] = $errors;
 
             $_SESSION['register_old'] = [
@@ -84,6 +87,7 @@ class AuthController
             exit;
         }
 
+        // Los nuevos registros se crean como pacientes activos (rol 3).
         $userId = $userModel->create([
             'role_id' => 3,
             'name' => $name,
@@ -96,6 +100,7 @@ class AuthController
 
         session_regenerate_id(true);
 
+        // Esta estructura identifica al usuario en las rutas protegidas.
         $_SESSION['user'] = [
             'id' => $userId,
             'role_id' => 3,
@@ -112,6 +117,7 @@ class AuthController
      */
     public function login(): void
     {
+        // Valida primero lo mínimo para no consultar datos incompletos.
         $email = trim($_POST['email'] ?? '');
         $password = $_POST['password'] ?? '';
 
@@ -135,6 +141,7 @@ class AuthController
             exit;
         }
 
+        // La contraseña se verifica contra el hash recuperado por el modelo.
         $userModel = new User();
         $user = $userModel->findByEmail($email);
 
@@ -167,6 +174,7 @@ class AuthController
          */
         session_regenerate_id(true);
 
+        // Guarda únicamente los datos necesarios durante la sesión autenticada.
         $_SESSION['user'] = [
             'id' => (int) $user['id_user'],
             'role_id' => (int) $user['id_rol'],
@@ -182,6 +190,7 @@ class AuthController
      */
     public function logout(): void
     {
+        // Elimina los datos en memoria y la cookie para cerrar la sesión por completo.
         $_SESSION = [];
 
         if (ini_get('session.use_cookies')) {
@@ -208,6 +217,7 @@ class AuthController
      */
     private function redirectByRole(int $roleId): void
     {
+        // Centraliza el destino inicial de cada tipo de usuario.
         $routes = [
             1 => '/administrador',
             2 => '/psicologo',

@@ -11,6 +11,7 @@
 
 <body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
 
+    <!-- El layout rodea el contenido de cada vista con los componentes compartidos. -->
     <?php require_once __DIR__ . '/../components/navbar.php'; ?>
 
     <main class="flex-1">

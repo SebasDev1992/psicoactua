@@ -84,6 +84,7 @@ unset($_SESSION['register_errors'], $_SESSION['register_old']);
                     method="POST"
                     class="grid gap-5 md:grid-cols-2"
                 >
+                    <!-- Conserva el contexto del error sin volver a mostrar la contraseña. -->
                     <?php if ($errors !== []): ?>
                         <div
                             role="alert"

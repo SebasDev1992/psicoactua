@@ -14,6 +14,7 @@ class User extends Model
      */
     public function findByEmail(string $email): ?array
     {
+        // La búsqueda respalda tanto el login como la verificación de correos repetidos.
         $query = '
             SELECT
                 id_user,
@@ -29,6 +30,7 @@ class User extends Model
             LIMIT 1
         ';
 
+        // El marcador evita interpolar el correo directamente en la consulta.
         $statement = $this->database->prepare($query);
 
         $statement->execute([
@@ -54,6 +56,7 @@ class User extends Model
      */
     public function create(array $data): int
     {
+        // Inserta las credenciales y datos básicos que forman la cuenta de usuario.
         $query = '
             INSERT INTO users (
                 id_rol,

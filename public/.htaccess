@@ -5,7 +5,7 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
 
-    # Envía las rutas como /login al archivo index.php.
+    # Las URLs de la aplicación pasan por el front controller para ser enrutadas.
     RewriteRule ^ index.php [QSA,L]
 </IfModule>
 

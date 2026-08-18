@@ -1,5 +1,5 @@
 <?php
-
+// La identidad mostrada fue creada durante el login y validada por el controlador.
 $user = $_SESSION['user'];
 ?>
 
@@ -57,6 +57,7 @@ $user = $_SESSION['user'];
                 Bienvenido,
             </p>
 
+            <!-- Evita interpretar como HTML el nombre proveniente de la sesión. -->
             <h2 class="text-3xl font-bold text-slate-900">
                 <?= htmlspecialchars(
                     $user['name'] . ' ' . $user['last_name'],

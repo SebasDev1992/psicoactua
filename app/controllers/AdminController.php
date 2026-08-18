@@ -8,6 +8,9 @@ require_once __DIR__ . '/../middleware/RoleMiddleware.php';
  */
 class AdminController
 {
+    /**
+     * Carga el panel reservado para usuarios administradores.
+     */
     public function index(): void
     {
         AuthMiddleware::handle();

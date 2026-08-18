@@ -1,5 +1,5 @@
 <?php
-
+// El controlador limita esta vista a una sesión con rol de administrador.
 $user = $_SESSION['user'];
 ?>
 
@@ -57,6 +57,7 @@ $user = $_SESSION['user'];
                 Bienvenido,
             </p>
 
+            <!-- La salida se escapa antes de mostrarse en el panel administrativo. -->
             <h2 class="text-3xl font-bold text-slate-900">
                 <?= htmlspecialchars(
                     $user['name'] . ' ' . $user['last_name'],

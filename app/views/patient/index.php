@@ -1,5 +1,5 @@
 <?php
-
+// La sesión ya fue validada por el controlador antes de cargar esta vista.
 $user = $_SESSION['user'];
 ?>
 
@@ -39,6 +39,7 @@ $user = $_SESSION['user'];
                 </h1>
             </div>
 
+            <!-- Envía el cierre de sesión mediante la ruta POST para finalizar la sesión actual. -->
             <form action="/logout" method="POST">
                 <button
                     type="submit"
@@ -59,6 +60,7 @@ $user = $_SESSION['user'];
                 Bienvenido,
             </p>
 
+            <!-- Escapa el nombre almacenado en sesión antes de insertarlo en el HTML. -->
             <h2 class="text-3xl font-bold text-slate-900">
                 <?= htmlspecialchars(
                     $user['name'] . ' ' . $user['last_name'],
@@ -112,8 +114,9 @@ $user = $_SESSION['user'];
                 </p>
             </a>
 
+            <!-- Esta tarjeta conecta el dashboard con la consulta de perfil del paciente. -->
             <a
-                href="#"
+                href="/paciente/perfil"
                 class="rounded-2xl bg-white p-6 shadow-sm
                        transition hover:-translate-y-1 hover:shadow-md"
             >

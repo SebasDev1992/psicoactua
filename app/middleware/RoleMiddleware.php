@@ -20,6 +20,7 @@ class RoleMiddleware
         $userRole = (int) $_SESSION['user']['role_id'];
 
         if (!in_array($userRole, $allowedRoles, true)) {
+            // Un usuario autenticado sin este permiso recibe una respuesta prohibida.
             http_response_code(403);
 
             exit('Acceso no autorizado.');

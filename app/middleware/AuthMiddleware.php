@@ -11,6 +11,7 @@ class AuthMiddleware
     public static function handle(): void
     {
         if (!isset($_SESSION['user'])) {
+            // El mensaje se muestra una sola vez en el formulario de inicio de sesión.
             $_SESSION['login_errors'] = [
                 'Debes iniciar sesión para acceder a esta página.',
             ];

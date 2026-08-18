@@ -2,9 +2,7 @@
 /**
  * Vista pública de inicio de sesión.
  *
- * Por ahora contiene únicamente la interfaz.
- * En el siguiente paso conectaremos el formulario
- * con el controlador y la base de datos.
+ * Envía las credenciales a AuthController para iniciar la sesión.
  */
 ?>
 <?php
@@ -87,6 +85,7 @@ unset($_SESSION['login_errors'], $_SESSION['old_email']);
                     method="POST"
                     class="space-y-5"
                 >
+                <!-- Los errores vienen de la sesión tras una validación o intento fallido. -->
                 <?php if ($errors !== []): ?>
                     <div
                         role="alert"
@@ -164,6 +163,7 @@ unset($_SESSION['login_errors'], $_SESSION['old_email']);
                             Recordarme
                         </label>
 
+                        <!-- Esta opción aún requiere una ruta y flujo de recuperación. -->
                         <a
                             href="/recuperar-contrasena"
                             class="text-sm font-medium text-cyan-700

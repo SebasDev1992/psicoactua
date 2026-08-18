@@ -5,6 +5,7 @@
     <p class="text-xl text-slate-600">
         Plataforma profesional de atención psicológica
     </p>
+    <!-- Muestra acciones de sesión solo cuando el controlador autorizó al usuario. -->
     <?php if (isset($_SESSION['user'])): ?>
         <div class="mt-8 text-center">
             <p class="mb-4 text-lg text-slate-700">

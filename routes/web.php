@@ -12,11 +12,16 @@ require_once __DIR__ . '/../app/controllers/AdminController.php';
  */
 $router->get('/', [HomeController::class, 'index']);
 
+// El flujo de autenticación comienza con el formulario y sus envíos POST.
 $router->get('/login', [AuthController::class, 'showLogin']);
 $router->post('/login', [AuthController::class, 'login']);
 $router->post('/logout', [AuthController::class, 'logout']);
 $router->get('/registro', [AuthController::class, 'showRegister']);
 $router->post('/registro', [AuthController::class, 'register']);
+
+// Cada panel delega su protección de sesión y rol al controlador.
 $router->get('/paciente', [PatientController::class, 'index']);
 $router->get('/psicologo', [PsychologistController::class, 'index']);
 $router->get('/administrador', [AdminController::class, 'index']);
+// Muestra los datos personales del paciente autenticado.
+$router->get('/paciente/perfil', [PatientController::class, 'profile']);
