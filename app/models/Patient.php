@@ -33,7 +33,7 @@ class Patient extends Model
         ";
 
         // El identificador se enlaza como parámetro para no alterar el SQL.
-      $stmt = $this->database->prepare($sql);;
+      $stmt = $this->database->prepare($sql);
 
         $stmt->execute([
             ':id_user' => $userId
