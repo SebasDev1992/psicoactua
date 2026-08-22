@@ -1,5 +1,6 @@
 <?php
-
+require_once __DIR__ . '/../../core/database.php';
+require_once __DIR__ . '/../models/Patient.php';
 require_once __DIR__ . '/../models/User.php';
 
 /**
@@ -87,18 +88,46 @@ class AuthController
             exit;
         }
 
-        // Los nuevos registros se crean como pacientes activos (rol 3).
-        $userId = $userModel->create([
-            'role_id' => 3,
-            'name' => $name,
-            'last_name' => $lastName,
-            'email' => $email,
-            'password' => password_hash($password, PASSWORD_DEFAULT),
-            'phone' => $phone,
-            'status' => 1,
-        ]);
+// Una misma conexión permite crear usuario y paciente como una sola operación.
+$database = new Database();
+$db = $database->connection();
 
-        session_regenerate_id(true);
+try {
+    $db->beginTransaction();
+
+    // Ambos modelos trabajan con la misma conexión PDO.
+    $userModel = new User($db);
+    $patientModel = new Patient($db);
+
+    // Los nuevos registros se crean como pacientes activos (rol 3).
+    $userId = $userModel->create([
+        'role_id' => 3,
+        'name' => $name,
+        'last_name' => $lastName,
+        'email' => $email,
+        'password' => password_hash($password, PASSWORD_DEFAULT),
+        'phone' => $phone,
+        'status' => 1,
+    ]);
+
+    // Crea la ficha del paciente relacionada con el usuario recién creado.
+    $patientModel->create($userId);
+
+    // Confirma ambas operaciones únicamente cuando todo salió bien.
+    $db->commit();
+    } catch (Throwable $exception) {
+        // Deshace cualquier cambio realizado dentro de la transacción.
+        if ($db->inTransaction()) {
+            $db->rollBack();
+        }
+
+        $_SESSION['register_errors'] = [
+            'No fue posible completar el registro. Inténtalo nuevamente.'
+        ];
+
+        header('Location: /registro');
+        exit;
+    }
 
         // Esta estructura identifica al usuario en las rutas protegidas.
         $_SESSION['user'] = [

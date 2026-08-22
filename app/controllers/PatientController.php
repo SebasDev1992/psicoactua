@@ -19,7 +19,10 @@ class PatientController
         // Usa el identificador de sesión para obtener el registro relacionado del paciente.
         $userId = (int) $_SESSION['user']['id'];
 
-        $patient = Patient::findByUserId($userId);
+        // El modelo consulta los datos del paciente usando la conexión heredada.
+        $patientModel = new Patient();
+
+        $patient = $patientModel->findByUserId($userId);
 
         require_once __DIR__ . '/../views/patient/index.php';
     }
@@ -31,7 +34,10 @@ class PatientController
 
         $userId = (int) $_SESSION['user']['id'];
 
-        $patient = Patient::findByUserId($userId);
+        // El modelo consulta los datos del paciente usando la conexión heredada.
+        $patientModel = new Patient();
+
+        $patient = $patientModel->findByUserId($userId);
 
         // Evita cargar una vista de perfil sin datos asociados al usuario actual.
         if ($patient === null) {

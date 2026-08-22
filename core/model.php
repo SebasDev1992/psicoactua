@@ -14,10 +14,18 @@ abstract class Model
     protected PDO $database;
 
     /**
-     * Inicializa la conexión para el modelo.
+     * Inicializa la conexión del modelo.
+     *
+     * Si recibe una conexión existente, la reutiliza.
+     * Esto permite compartir una misma transacción entre modelos.
      */
-    public function __construct()
+    public function __construct(?PDO $database = null)
     {
+        if ($database !== null) {
+            $this->database = $database;
+            return;
+        }
+
         require_once __DIR__ . '/database.php';
 
         $connection = new Database();
