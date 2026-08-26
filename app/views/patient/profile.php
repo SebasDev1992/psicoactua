@@ -67,110 +67,143 @@
                 </p>
             </div>
 
-            <!-- Cada valor se escapa porque procede de información almacenada en la base de datos. -->
-            <div class="grid gap-6 md:grid-cols-2">
-
+                <form
+                    method="POST"
+                    action="/paciente/perfil"
+                    class="grid gap-6 md:grid-cols-2"
+                >
                 <div>
-                    <p class="text-sm font-medium text-slate-500">
-                        Nombres
-                    </p>
+                <p class="text-sm font-medium text-slate-500">
+                            Nombres
+                </p>
 
-                    <p class="mt-1 text-lg text-slate-900">
-                        <?= htmlspecialchars(
-                            $patient['nom'],
-                            ENT_QUOTES,
-                            'UTF-8'
-                        ) ?>
-                    </p>
+                        <p class="mt-1 text-lg text-slate-900">
+                <?= htmlspecialchars(
+                                $patient['nom'],
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?>
+                </p>
                 </div>
 
-                <div>
-                    <p class="text-sm font-medium text-slate-500">
-                        Apellidos
-                    </p>
+                    <div>
+                <p class="text-sm font-medium text-slate-500">
+                            Apellidos
+                </p>
 
-                    <p class="mt-1 text-lg text-slate-900">
-                        <?= htmlspecialchars(
-                            $patient['ape'],
-                            ENT_QUOTES,
-                            'UTF-8'
-                        ) ?>
-                    </p>
+                        <p class="mt-1 text-lg text-slate-900">
+                <?= htmlspecialchars(
+                                $patient['ape'],
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?>
+                </p>
                 </div>
 
-                <div>
-                    <p class="text-sm font-medium text-slate-500">
-                        Correo electrónico
-                    </p>
+                    <div>
+                <p class="text-sm font-medium text-slate-500">
+                            Correo electrónico
+                </p>
 
-                    <p class="mt-1 text-lg text-slate-900">
-                        <?= htmlspecialchars(
-                            $patient['email'],
-                            ENT_QUOTES,
-                            'UTF-8'
-                        ) ?>
-                    </p>
+                        <p class="mt-1 text-lg text-slate-900">
+                <?= htmlspecialchars(
+                                $patient['email'],
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?>
+                </p>
                 </div>
 
-                <div>
-                    <p class="text-sm font-medium text-slate-500">
-                        Teléfono
-                    </p>
+                    <div>
+                <p class="text-sm font-medium text-slate-500">
+                            Teléfono
+                </p>
 
-                    <p class="mt-1 text-lg text-slate-900">
-                        <?= htmlspecialchars(
-                            $patient['tel'] ?? 'No registrado',
-                            ENT_QUOTES,
-                            'UTF-8'
-                        ) ?>
-                    </p>
+                        <p class="mt-1 text-lg text-slate-900">
+                <?= htmlspecialchars(
+                                $patient['tel'] ?? 'No registrado',
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?>
+                </p>
                 </div>
 
-                <div>
-                    <p class="text-sm font-medium text-slate-500">
-                        Fecha de nacimiento
-                    </p>
+                    <div>
+                <label
+                            for="fecha_nac"
+                            class="text-sm font-medium text-slate-500"
+                >
+                            Fecha de nacimiento
+                </label>
 
-                    <p class="mt-1 text-lg text-slate-900">
-                        <?= htmlspecialchars(
-                            $patient['fecha_nac'] ?? 'No registrada',
-                            ENT_QUOTES,
-                            'UTF-8'
-                        ) ?>
-                    </p>
+                        <input
+                            type="date"
+                            id="fecha_nac"
+                            name="fecha_nac"
+                            value="<?= htmlspecialchars(
+                                $patient['fecha_nac'] ?? '',
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?>"
+                            class="mt-1 w-full rounded-lg border border-slate-300
+                                px-4 py-2 text-slate-900"
+                >
                 </div>
 
-                <div>
-                    <p class="text-sm font-medium text-slate-500">
-                        Género
-                    </p>
+                    <div>
+                <label
+                            for="genero"
+                            class="text-sm font-medium text-slate-500"
+                >
+                            Género
+                </label>
 
-                    <p class="mt-1 text-lg text-slate-900">
-                        <?= htmlspecialchars(
-                            $patient['genero'] ?? 'No registrado',
-                            ENT_QUOTES,
-                            'UTF-8'
-                        ) ?>
-                    </p>
+                        <input
+                            type="text"
+                            id="genero"
+                            name="genero"
+                            value="<?= htmlspecialchars(
+                                $patient['genero'] ?? '',
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?>"
+                            class="mt-1 w-full rounded-lg border border-slate-300
+                                px-4 py-2 text-slate-900"
+                >
                 </div>
 
-                <div class="md:col-span-2">
-                    <p class="text-sm font-medium text-slate-500">
-                        Dirección
-                    </p>
+                    <div class="md:col-span-2">
+                <label
+                            for="direccion"
+                            class="text-sm font-medium text-slate-500"
+                >
+                            Dirección
+                </label>
 
-                    <p class="mt-1 text-lg text-slate-900">
-                        <?= htmlspecialchars(
-                            $patient['direccion'] ?? 'No registrada',
-                            ENT_QUOTES,
-                            'UTF-8'
-                        ) ?>
-                    </p>
+                        <input
+                            type="text"
+                            id="direccion"
+                            name="direccion"
+                            value="<?= htmlspecialchars(
+                                $patient['direccion'] ?? '',
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?>"
+                            class="mt-1 w-full rounded-lg border border-slate-300
+                                px-4 py-2 text-slate-900"
+                >
                 </div>
 
-            </div>
-
-        </div>
+                    <div class="md:col-span-2">
+                <button
+                    type="submit"
+                    style="background-color: #0891b2; color: white;"
+                    class="rounded-lg px-5 py-3 font-semibold transition"
+                >
+                    Guardar cambios
+                </button>
+                </div>
+            </form>
 
     </main>
 

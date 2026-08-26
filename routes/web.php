@@ -25,3 +25,4 @@ $router->get('/psicologo', [PsychologistController::class, 'index']);
 $router->get('/administrador', [AdminController::class, 'index']);
 // Muestra los datos personales del paciente autenticado.
 $router->get('/paciente/perfil', [PatientController::class, 'profile']);
+$router->post('/paciente/perfil', [PatientController::class, 'updateProfile']);

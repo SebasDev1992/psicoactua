@@ -47,4 +47,35 @@ class PatientController
 
         require_once __DIR__ . '/../views/patient/profile.php';
     }
+    /**
+* Procesa la actualización de los datos personales del paciente.
+*/
+public function updateProfile(): void
+    {
+        AuthMiddleware::handle();
+        RoleMiddleware::handle([3]);
+
+        $userId = (int) $_SESSION['user']['id'];
+
+        $fechaNacimiento = trim($_POST['fecha_nac'] ?? '');
+        $genero = trim($_POST['genero'] ?? '');
+        $direccion = trim($_POST['direccion'] ?? '');
+
+        // Convierte campos vacíos en NULL para mantener la BD consistente.
+        $fechaNacimiento = $fechaNacimiento !== '' ? $fechaNacimiento : null;
+        $genero = $genero !== '' ? $genero : null;
+        $direccion = $direccion !== '' ? $direccion : null;
+
+        $patientModel = new Patient();
+
+        $patientModel->update(
+            $userId,
+            $fechaNacimiento,
+            $genero,
+            $direccion
+        );
+
+        header('Location: /paciente/perfil');
+        exit;
+    }
 }

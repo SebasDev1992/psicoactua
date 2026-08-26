@@ -12,7 +12,7 @@ class Patient extends Model
      */
     public function findByUserId(int $userId): ?array
     {
-       
+
         // El JOIN reúne datos de cuenta y datos personales en una sola respuesta.
         $sql = "
             SELECT
@@ -33,7 +33,7 @@ class Patient extends Model
         ";
 
         // El identificador se enlaza como parámetro para no alterar el SQL.
-      $stmt = $this->database->prepare($sql);;
+      $stmt = $this->database->prepare($sql);
 
         $stmt->execute([
             ':id_user' => $userId
@@ -70,5 +70,34 @@ class Patient extends Model
         ]);
 
         return (int) $this->database->lastInsertId();
+
+        }
+        /**
+    * Actualiza los datos personales de un paciente.
+    */
+    public function update(
+        int $userId,
+        ?string $fechaNacimiento,
+        ?string $genero,
+        ?string $direccion
+    ): void {
+        // Actualiza únicamente los datos pertenecientes a la ficha del paciente.
+        $sql = "
+            UPDATE pacientes
+            SET
+                fecha_nac = :fecha_nac,
+                genero = :genero,
+                direccion = :direccion
+            WHERE id_user = :id_user
+        ";
+
+        $stmt = $this->database->prepare($sql);
+
+        $stmt->execute([
+            ':fecha_nac' => $fechaNacimiento,
+            ':genero' => $genero,
+            ':direccion' => $direccion,
+            ':id_user' => $userId,
+        ]);
     }
 }
