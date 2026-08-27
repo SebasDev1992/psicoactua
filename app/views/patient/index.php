@@ -1,6 +1,8 @@
 <?php
 // La sesión ya fue validada por el controlador antes de cargar esta vista.
 $user = $_SESSION['user'];
+$success = $_SESSION['success'] ?? null;
+unset($_SESSION['success']);
 ?>
 
 <!DOCTYPE html>
@@ -69,6 +71,11 @@ $user = $_SESSION['user'];
                 ) ?>
             </h2>
         </section>
+        <?php if ($success !== null): ?>
+            <div class="mb-8 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-800">
+                <?= htmlspecialchars($success, ENT_QUOTES, 'UTF-8') ?>
+            </div>
+        <?php endif; ?>
 
         <section class="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
 
