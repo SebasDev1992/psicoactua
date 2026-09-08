@@ -150,6 +150,7 @@ try {
         $email = trim($_POST['email'] ?? '');
         $password = $_POST['password'] ?? '';
 
+
         $errors = [];
 
         if ($email === '') {
@@ -173,6 +174,7 @@ try {
         // La contraseña se verifica contra el hash recuperado por el modelo.
         $userModel = new User();
         $user = $userModel->findByEmail($email);
+      
 
         if (
             $user === null

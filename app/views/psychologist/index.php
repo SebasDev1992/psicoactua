@@ -99,7 +99,7 @@ $user = $_SESSION['user'];
                 </p>
             </a>
 
-            <a href="#" class="rounded-2xl bg-white p-6 shadow-sm">
+            <a href="/psicologo/disponibilidad" class="rounded-2xl bg-white p-6 shadow-sm">
                 <h3 class="text-lg font-semibold">
                     Disponibilidad
                 </h3>

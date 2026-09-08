@@ -26,3 +26,10 @@ $router->get('/administrador', [AdminController::class, 'index']);
 // Muestra los datos personales del paciente autenticado.
 $router->get('/paciente/perfil', [PatientController::class, 'profile']);
 $router->post('/paciente/perfil', [PatientController::class, 'updateProfile']);
+$router->get('/psicologo', [PsychologistController::class, 'index']);
+
+// Permite al psicólogo consultar sus horarios de disponibilidad.
+$router->get('/psicologo/disponibilidad', [PsychologistController::class, 'availability']);
+
+// Permite al psicólogo crear un nuevo horario.
+$router->post('/psicologo/disponibilidad', [PsychologistController::class, 'createAvailability']);
