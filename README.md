@@ -1,4 +1,4 @@
-<!--Pasos para arrancar el servidor seguir los siguientes pasos 
+<!--Pasos para arrancar el servidor 
 
 1. iniciar una nueva terminal
 

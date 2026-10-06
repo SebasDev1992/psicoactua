@@ -7,6 +7,11 @@
  * @var array $psychologist
  */
 ?>
+<?php
+$errors = $_SESSION['availability_errors'] ?? [];
+unset($_SESSION['availability_errors']);
+?>
+
 
 <!DOCTYPE html>
 <html lang="es">
@@ -75,6 +80,13 @@
             <?php unset($_SESSION['success']); ?>
 
         <?php endif; ?>
+        <?php if (!empty($errors)): ?>
+            <div class="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                <?php foreach ($errors as $error): ?>
+                    <p><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></p>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
 
         <section class="mb-8">
             <h2 class="text-2xl font-bold text-slate-900">
@@ -125,7 +137,7 @@
                         <option value="4">Jueves</option>
                         <option value="5">Viernes</option>
                         <option value="6">Sábado</option>
-                        <option value="7">Domingo</option>
+                        
                     </select>
                 </div>
 

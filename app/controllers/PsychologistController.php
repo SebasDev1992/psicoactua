@@ -50,21 +50,49 @@ class PsychologistController
         require_once __DIR__ . '/../views/psychologist/availability.php';
     }
 
-    /**
-     * Procesa la creación de un nuevo horario.
-     */
     public function createAvailability(): void
     {
         AuthMiddleware::handle();
         RoleMiddleware::handle([2]);
 
         $userId = (int) $_SESSION['user']['id'];
-
         $dayOfWeek = (int) ($_POST['dia_semana'] ?? 0);
         $startTime = trim($_POST['hora_inicio'] ?? '');
         $endTime = trim($_POST['hora_fin'] ?? '');
 
-        // Busca al psicólogo relacionado con el usuario autenticado.
+        $errors = [];
+
+        // Valida el día seleccionado.
+        if ($dayOfWeek < 1 || $dayOfWeek > 6) {
+            $errors[] = 'Selecciona un día válido.';
+        }
+
+        // Valida el formato recibido desde el formulario.
+        if (
+            !preg_match('/^\d{2}:\d{2}$/', $startTime) ||
+            !preg_match('/^\d{2}:\d{2}$/', $endTime)
+        ) {
+            $errors[] = 'Las horas seleccionadas no son válidas.';
+        }
+
+        // Comprueba que el rango tenga sentido.
+        if (empty($errors)) {
+            $start = DateTime::createFromFormat('H:i', $startTime);
+            $end = DateTime::createFromFormat('H:i', $endTime);
+
+            if ($start === false || $end === false) {
+                $errors[] = 'Las horas seleccionadas no son válidas.';
+            } elseif ($start >= $end) {
+                $errors[] = 'La hora de inicio debe ser menor que la hora de fin.';
+            }
+        }
+            // Detiene el proceso si los datos ya son inválidos.
+        if (!empty($errors)) {
+            $_SESSION['availability_errors'] = $errors;
+            header('Location: /psicologo/disponibilidad');
+            exit;
+        }
+
         $psychologistModel = new Psychologist();
         $psychologist = $psychologistModel->findByUserId($userId);
 
@@ -75,6 +103,25 @@ class PsychologistController
 
         $availabilityModel = new Availability();
 
+        // Evita cruces con otros horarios activos.
+        if (
+            empty($errors) &&
+            $availabilityModel->hasOverlap(
+                (int) $psychologist['id_psi'],
+                $dayOfWeek,
+                $startTime,
+                $endTime
+            )
+        ) {
+            $errors[] = 'El horario se cruza con otro horario existente.';
+        }
+
+        if (!empty($errors)) {
+            $_SESSION['availability_errors'] = $errors;
+            header('Location: /psicologo/disponibilidad');
+            exit;
+        }
+
         $availabilityModel->create(
             (int) $psychologist['id_psi'],
             $dayOfWeek,
@@ -83,7 +130,6 @@ class PsychologistController
         );
 
         $_SESSION['success'] = 'Horario creado correctamente.';
-
         header('Location: /psicologo/disponibilidad');
         exit;
     }

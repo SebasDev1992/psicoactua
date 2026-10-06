@@ -35,6 +35,34 @@ class Availability extends Model
         return $stmt->fetchAll();
     }
 
+        public function hasOverlap(
+        int $psychologistId,
+        int $dayOfWeek,
+        string $startTime,
+        string $endTime
+    ): bool {
+        $sql = "
+            SELECT COUNT(*)
+            FROM disponibilidad
+            WHERE id_psi = :id_psi
+            AND dia_semana = :dia_semana
+            AND estado = 1
+            AND hora_inicio < :hora_fin
+            AND hora_fin > :hora_inicio
+        ";
+
+        $stmt = $this->database->prepare($sql);
+        $stmt->execute([
+            ':id_psi' => $psychologistId,
+            ':dia_semana' => $dayOfWeek,
+            ':hora_inicio' => $startTime,
+            ':hora_fin' => $endTime,
+        ]);
+
+        return (int) $stmt->fetchColumn() > 0;
+    }
+    
+
     /**
      * Crea un nuevo horario de disponibilidad.
      */
