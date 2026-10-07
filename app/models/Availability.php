@@ -99,4 +99,23 @@ class Availability extends Model
 
         return (int) $this->database->lastInsertId();
     }
+    
+    public function deactivate(
+        int $psychologistId,
+        int $availabilityId
+    ): void {
+        $sql = "
+            UPDATE disponibilidad
+            SET estado = 0
+            WHERE id_disponibilidad = :id_disponibilidad
+            AND id_psi = :id_psi
+            AND estado = 1
+        ";
+
+        $stmt = $this->database->prepare($sql);
+        $stmt->execute([
+            ':id_disponibilidad' => $availabilityId,
+            ':id_psi' => $psychologistId,
+        ]);
+    }
 }

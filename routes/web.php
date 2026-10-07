@@ -32,3 +32,9 @@ $router->get('/psicologo/disponibilidad', [PsychologistController::class, 'avail
 
 // Permite al psicólogo crear un nuevo horario.
 $router->post('/psicologo/disponibilidad', [PsychologistController::class, 'createAvailability']);
+
+// Permite al psicólogo desactivar uno de sus horarios activos.
+$router->post(
+    '/psicologo/disponibilidad/desactivar',
+    [PsychologistController::class, 'deactivateAvailability']
+);

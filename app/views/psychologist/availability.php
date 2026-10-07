@@ -1,17 +1,19 @@
 <?php
 
 /**
- * Horarios del psicólogo recuperados por el controlador.
+ * Vista de disponibilidad del psicólogo.
  *
+ * Variables recibidas desde el controlador:
  * @var array $availability
  * @var array $psychologist
  */
-?>
-<?php
+
+// Recupera los errores enviados desde el controlador después de una
+// validación fallida y los elimina de la sesión para que sean temporales.
 $errors = $_SESSION['availability_errors'] ?? [];
 unset($_SESSION['availability_errors']);
-?>
 
+?>
 
 <!DOCTYPE html>
 <html lang="es">
@@ -34,6 +36,7 @@ unset($_SESSION['availability_errors']);
 
 <body class="min-h-screen bg-slate-100">
 
+    <!-- Encabezado principal de la sección. -->
     <header class="bg-slate-900 text-white">
         <div
             class="mx-auto flex max-w-7xl items-center
@@ -62,6 +65,7 @@ unset($_SESSION['availability_errors']);
 
     <main class="mx-auto max-w-5xl px-6 py-10">
 
+        <!-- Mensaje temporal mostrado después de una operación exitosa. -->
         <?php if (isset($_SESSION['success'])): ?>
 
             <div
@@ -74,21 +78,37 @@ unset($_SESSION['availability_errors']);
                     ENT_QUOTES,
                     'UTF-8'
                 ) ?>
-
             </div>
 
             <?php unset($_SESSION['success']); ?>
 
         <?php endif; ?>
+
+        <!-- Muestra uno o varios errores enviados por el controlador. -->
         <?php if (!empty($errors)): ?>
-            <div class="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+
+            <div
+                class="mb-6 rounded-lg border border-red-200
+                       bg-red-50 px-4 py-3 text-sm text-red-700"
+            >
                 <?php foreach ($errors as $error): ?>
-                    <p><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></p>
+
+                    <p>
+                        <?= htmlspecialchars(
+                            $error,
+                            ENT_QUOTES,
+                            'UTF-8'
+                        ) ?>
+                    </p>
+
                 <?php endforeach; ?>
             </div>
+
         <?php endif; ?>
 
+        <!-- Información general del horario profesional. -->
         <section class="mb-8">
+
             <h2 class="text-2xl font-bold text-slate-900">
                 Configura tus horarios de atención
             </h2>
@@ -100,11 +120,14 @@ unset($_SESSION['availability_errors']);
                     'UTF-8'
                 ) ?>
             </p>
+
         </section>
 
+        <!-- Formulario para crear un nuevo horario. -->
         <section
             class="mb-8 rounded-2xl bg-white p-8 shadow-sm"
         >
+
             <h3 class="mb-6 text-xl font-semibold text-slate-900">
                 Nuevo horario
             </h3>
@@ -115,7 +138,9 @@ unset($_SESSION['availability_errors']);
                 class="grid gap-6 md:grid-cols-3"
             >
 
+                <!-- Selección del día de atención. -->
                 <div>
+
                     <label
                         for="dia_semana"
                         class="block text-sm font-medium text-slate-600"
@@ -137,11 +162,13 @@ unset($_SESSION['availability_errors']);
                         <option value="4">Jueves</option>
                         <option value="5">Viernes</option>
                         <option value="6">Sábado</option>
-                        
                     </select>
+
                 </div>
 
+                <!-- Hora en la que comienza la atención. -->
                 <div>
+
                     <label
                         for="hora_inicio"
                         class="block text-sm font-medium text-slate-600"
@@ -157,9 +184,12 @@ unset($_SESSION['availability_errors']);
                         class="mt-1 w-full rounded-lg border
                                border-slate-300 px-4 py-2"
                     >
+
                 </div>
 
+                <!-- Hora en la que termina la atención. -->
                 <div>
+
                     <label
                         for="hora_fin"
                         class="block text-sm font-medium text-slate-600"
@@ -175,9 +205,12 @@ unset($_SESSION['availability_errors']);
                         class="mt-1 w-full rounded-lg border
                                border-slate-300 px-4 py-2"
                     >
+
                 </div>
 
+                <!-- Envía el nuevo horario al controlador. -->
                 <div class="md:col-span-3">
+
                     <button
                         type="submit"
                         class="rounded-lg bg-cyan-600
@@ -186,11 +219,14 @@ unset($_SESSION['availability_errors']);
                     >
                         Agregar horario
                     </button>
+
                 </div>
 
             </form>
+
         </section>
 
+        <!-- Listado de horarios actualmente activos. -->
         <section class="rounded-2xl bg-white p-8 shadow-sm">
 
             <h3 class="mb-6 text-xl font-semibold text-slate-900">
@@ -208,8 +244,11 @@ unset($_SESSION['availability_errors']);
                 <div class="overflow-x-auto">
 
                     <table class="w-full text-left">
+
                         <thead>
+
                             <tr class="border-b border-slate-200">
+
                                 <th class="px-4 py-3 text-sm font-semibold">
                                     Día
                                 </th>
@@ -225,11 +264,20 @@ unset($_SESSION['availability_errors']);
                                 <th class="px-4 py-3 text-sm font-semibold">
                                     Estado
                                 </th>
+
+                                <!-- Nueva columna para gestionar el horario. -->
+                                <th class="px-4 py-3 text-sm font-semibold">
+                                    Acciones
+                                </th>
+
                             </tr>
+
                         </thead>
 
                         <tbody>
+
                             <?php
+                            // Traduce el número almacenado en la BD al nombre del día.
                             $days = [
                                 1 => 'Lunes',
                                 2 => 'Martes',
@@ -237,7 +285,7 @@ unset($_SESSION['availability_errors']);
                                 4 => 'Jueves',
                                 5 => 'Viernes',
                                 6 => 'Sábado',
-                                7 => 'Domingo',
+                                
                             ];
                             ?>
 
@@ -245,6 +293,7 @@ unset($_SESSION['availability_errors']);
 
                                 <tr class="border-b border-slate-100">
 
+                                    <!-- Día de atención. -->
                                     <td class="px-4 py-3">
                                         <?= htmlspecialchars(
                                             $days[$schedule['dia_semana']] ?? 'Desconocido',
@@ -253,6 +302,7 @@ unset($_SESSION['availability_errors']);
                                         ) ?>
                                     </td>
 
+                                    <!-- Hora de inicio. -->
                                     <td class="px-4 py-3">
                                         <?= htmlspecialchars(
                                             $schedule['hora_inicio'],
@@ -261,6 +311,7 @@ unset($_SESSION['availability_errors']);
                                         ) ?>
                                     </td>
 
+                                    <!-- Hora de finalización. -->
                                     <td class="px-4 py-3">
                                         <?= htmlspecialchars(
                                             $schedule['hora_fin'],
@@ -269,8 +320,44 @@ unset($_SESSION['availability_errors']);
                                         ) ?>
                                     </td>
 
+                                    <!-- Los registros obtenidos por el modelo son activos. -->
                                     <td class="px-4 py-3">
                                         Activo
+                                    </td>
+
+                                    <!-- Acción para desactivar el horario. -->
+                                    <td class="px-4 py-3">
+
+                                        <form
+                                            action="/psicologo/disponibilidad/desactivar"
+                                            method="POST"
+                                            onsubmit="return confirm(
+                                                '¿Deseas desactivar este horario?'
+                                            );"
+                                        >
+
+                                            <!--
+                                                Envía al controlador el ID del horario
+                                                que se desea desactivar.
+                                            -->
+                                            <input
+                                                type="hidden"
+                                                name="id_disponibilidad"
+                                                value="<?= (int) $schedule['id_disponibilidad'] ?>"
+                                            >
+
+                                            <button
+                                                type="submit"
+                                                class="rounded-lg border border-red-200
+                                                       bg-red-50 px-3 py-2 text-sm
+                                                       font-medium text-red-700
+                                                       transition hover:bg-red-100"
+                                            >
+                                                Desactivar
+                                            </button>
+
+                                        </form>
+
                                     </td>
 
                                 </tr>
@@ -278,6 +365,7 @@ unset($_SESSION['availability_errors']);
                             <?php endforeach; ?>
 
                         </tbody>
+
                     </table>
 
                 </div>
@@ -289,4 +377,5 @@ unset($_SESSION['availability_errors']);
     </main>
 
 </body>
+
 </html>
