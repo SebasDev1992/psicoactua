@@ -34,6 +34,40 @@ class Availability extends Model
 
         return $stmt->fetchAll();
     }
+    /**
+     * Obtiene los horarios activos de un psicólogo para un día específico.
+     *
+     * dia_semana:
+     * 1 = lunes ... 6 = sábado.
+     */
+    public function getByPsychologistAndDay(
+        int $psychologistId,
+        int $dayOfWeek
+    ): array {
+        $sql = "
+            SELECT
+                id_disponibilidad,
+                id_psi,
+                dia_semana,
+                hora_inicio,
+                hora_fin,
+                estado
+            FROM disponibilidad
+            WHERE id_psi = :id_psi
+            AND dia_semana = :dia_semana
+            AND estado = 1
+            ORDER BY hora_inicio ASC
+        ";
+
+        $stmt = $this->database->prepare($sql);
+
+        $stmt->execute([
+            ':id_psi' => $psychologistId,
+            ':dia_semana' => $dayOfWeek,
+        ]);
+
+        return $stmt->fetchAll();
+    }
 
         public function hasOverlap(
         int $psychologistId,

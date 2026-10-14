@@ -4,7 +4,7 @@ require_once __DIR__ . '/../app/controllers/AuthController.php';
 require_once __DIR__ . '/../app/controllers/PatientController.php';
 require_once __DIR__ . '/../app/controllers/PsychologistController.php';
 require_once __DIR__ . '/../app/controllers/AdminController.php';
-
+require_once __DIR__ . '/../app/controllers/CitaController.php';
 
 
 /**
@@ -37,4 +37,10 @@ $router->post('/psicologo/disponibilidad', [PsychologistController::class, 'crea
 $router->post(
     '/psicologo/disponibilidad/desactivar',
     [PsychologistController::class, 'deactivateAvailability']
+);
+
+// Consulta dinámicamente los horarios disponibles para una fecha.
+$router->get(
+    '/paciente/agendar/horarios',
+    [CitaController::class, 'horariosDisponibles']
 );

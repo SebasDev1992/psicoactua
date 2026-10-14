@@ -63,5 +63,36 @@ class Psychologist extends Model
 
         return $psychologist ?: null;
     }
+    /**
+     * Busca un psicólogo activo por su identificador profesional.
+     */
+    public function findActiveById(int $psychologistId): ?array
+    {
+        $sql = "
+            SELECT
+                p.id_psi,
+                p.id_user,
+                p.especialidad,
+                p.licencia,
+                u.nom,
+                u.ape
+            FROM psicologos p
+            INNER JOIN users u
+                ON u.id_user = p.id_user
+            WHERE p.id_psi = :id_psi
+            AND u.estado = 1
+            LIMIT 1
+        ";
+
+        $stmt = $this->database->prepare($sql);
+
+        $stmt->execute([
+            ':id_psi' => $psychologistId,
+        ]);
+
+        $psychologist = $stmt->fetch();
+
+        return $psychologist ?: null;
+    }   
 
 }
