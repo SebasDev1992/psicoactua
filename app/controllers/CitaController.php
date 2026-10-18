@@ -1,41 +1,62 @@
 <?php
 
 require_once __DIR__ . '/../models/Psychologist.php';
-require_once __DIR__ . '/../models/Availability.php';
-require_once __DIR__ . '/../models/Cita.php';
+require_once __DIR__ . '/../services/CitaService.php';
 require_once __DIR__ . '/../middleware/AuthMiddleware.php';
 require_once __DIR__ . '/../middleware/RoleMiddleware.php';
 
-/**
- * Controlador encargado del agendamiento de citas.
- *
- * Coordina la disponibilidad del psicólogo con las citas
- * existentes para determinar qué horarios puede solicitar
- * un paciente.
- */
 class CitaController
 {
     /**
-     * Duración fija de cada cita en minutos.
+     * Muestra los psicólogos disponibles para agendar.
      */
-    private const DURACION_CITA = 60;
+    public function seleccionarPsicologo(): void
+    {
+        AuthMiddleware::handle();
+        RoleMiddleware::handle([3]);
+
+        $psychologistModel = new Psychologist();
+        $psicologos = $psychologistModel->getActivePsychologists();
+
+        require_once __DIR__ . '/../views/patient/agendar.php';
+    }
 
     /**
-     * Cantidad máxima de días que pueden consultarse hacia adelante.
+     * Muestra el calendario del psicólogo seleccionado.
      */
-    private const DIAS_AGENDAMIENTO = 60;
+    public function mostrarCalendario(): void
+    {
+        AuthMiddleware::handle();
+        RoleMiddleware::handle([3]);
+
+        $idPsicologo = filter_var(
+            $_GET['id_psi'] ?? null,
+            FILTER_VALIDATE_INT
+        );
+
+        if ($idPsicologo === false || $idPsicologo === null || $idPsicologo < 1) {
+            http_response_code(400);
+            exit('El psicólogo seleccionado no es válido.');
+        }
+
+        $psychologistModel = new Psychologist();
+
+        $psicologo = $psychologistModel->findActiveById($idPsicologo);
+
+        if ($psicologo === null) {
+            http_response_code(404);
+            exit('No se encontró el psicólogo seleccionado.');
+        }
+
+        if (empty($_SESSION['csrf_token'])) {
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        }
+
+        require_once __DIR__ . '/../views/patient/calendario.php';
+    }
 
     /**
-     * Zona horaria utilizada por la aplicación.
-     */
-    private const ZONA_HORARIA = 'America/Bogota';
-
-    /**
-     * Obtiene los horarios disponibles de un psicólogo
-     * para una fecha determinada.
-     *
-     * La respuesta se entrega en JSON para que la interfaz
-     * pueda actualizar los horarios sin recargar toda la página.
+     * Devuelve los horarios disponibles para una fecha.
      */
     public function horariosDisponibles(): void
     {
@@ -50,226 +71,142 @@ class CitaController
 
         $date = trim($_GET['fecha'] ?? '');
 
-        // Valida que se haya recibido un psicólogo válido.
-        if ($psychologistId === false || $psychologistId === null) {
-            $this->jsonResponse(
-                [
-                    'ok' => false,
-                    'mensaje' => 'El psicólogo seleccionado no es válido.',
-                ],
-                400
-            );
-        }
-
-        // Valida el formato ISO de la fecha: YYYY-MM-DD.
-        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
-            $this->jsonResponse(
-                [
-                    'ok' => false,
-                    'mensaje' => 'La fecha seleccionada no es válida.',
-                ],
-                400
-            );
-        }
-
-        $timezone = new DateTimeZone(self::ZONA_HORARIA);
-
-        $today = new DateTimeImmutable(
-            'today',
-            $timezone
-        );
-
-        $selectedDate = DateTimeImmutable::createFromFormat(
-            '!Y-m-d',
-            $date,
-            $timezone
-        );
-
-        $dateErrors = DateTimeImmutable::getLastErrors();
-
-        // Detecta fechas inexistentes, por ejemplo 2026-02-31.
         if (
-            $selectedDate === false ||
-            (
-                is_array($dateErrors) &&
-                ($dateErrors['warning_count'] > 0 ||
-                $dateErrors['error_count'] > 0)
-            )
+            $psychologistId === false ||
+            $psychologistId === null ||
+            $psychologistId < 1
         ) {
-            $this->jsonResponse(
-                [
-                    'ok' => false,
-                    'mensaje' => 'La fecha seleccionada no existe.',
-                ],
-                400
-            );
+            $this->jsonResponse([
+                'ok' => false,
+                'mensaje' => 'El psicólogo seleccionado no es válido.',
+            ], 400);
         }
 
-        $lastAllowedDate = $today->modify(
-            '+' . self::DIAS_AGENDAMIENTO . ' days'
-        );
+        try {
+            $service = new CitaService();
 
-        // Impide fechas anteriores a hoy o fuera de la ventana permitida.
-        if (
-            $selectedDate < $today ||
-            $selectedDate > $lastAllowedDate
-        ) {
-            $this->jsonResponse(
-                [
-                    'ok' => false,
-                    'mensaje' => 'La fecha debe estar dentro de los próximos 60 días.',
-                ],
-                422
+            $horarios = $service->obtenerHorariosDisponibles(
+                (int) $psychologistId,
+                $date
             );
-        }
 
-        // ISO-8601: 1 = lunes ... 7 = domingo.
-        $dayOfWeek = (int) $selectedDate->format('N');
+            $timezone = new DateTimeZone('America/Bogota');
 
-        // PsicoActúa permite agendamiento de lunes a sábado.
-        if ($dayOfWeek > 6) {
-            $this->jsonResponse(
-                [
-                    'ok' => true,
-                    'fecha' => $date,
-                    'horarios' => [],
-                    'mensaje' => 'No hay atención disponible los domingos.',
-                ]
+            $fecha = DateTimeImmutable::createFromFormat(
+                '!Y-m-d',
+                $date,
+                $timezone
             );
-        }
 
-        // Verifica que el psicólogo exista y esté activo.
-        $psychologistModel = new Psychologist();
+            $diaSemana = $fecha !== false
+                ? (int) $fecha->format('N')
+                : null;
 
-        $psychologist = $psychologistModel->findActiveById(
-            (int) $psychologistId
-        );
-
-        if ($psychologist === null) {
-            $this->jsonResponse(
-                [
-                    'ok' => false,
-                    'mensaje' => 'El psicólogo seleccionado no está disponible.',
-                ],
-                404
-            );
-        }
-
-        // Obtiene las ventanas de disponibilidad para ese día.
-        $availabilityModel = new Availability();
-
-        $availability = $availabilityModel->getByPsychologistAndDay(
-            (int) $psychologistId,
-            $dayOfWeek
-        );
-
-        if ($availability === []) {
             $this->jsonResponse([
                 'ok' => true,
                 'fecha' => $date,
-                'horarios' => [],
-                'mensaje' => 'El psicólogo no tiene disponibilidad para esta fecha.',
+                'dia_semana' => $diaSemana,
+                'duracion_minutos' => 60,
+                'horarios' => $horarios,
             ]);
+        } catch (InvalidArgumentException $exception) {
+            $this->jsonResponse([
+                'ok' => false,
+                'mensaje' => $exception->getMessage(),
+            ], 422);
+        } catch (RuntimeException $exception) {
+            $this->jsonResponse([
+                'ok' => false,
+                'mensaje' => $exception->getMessage(),
+            ], 404);
         }
-
-        // Recupera las horas que ya están ocupadas por otras citas.
-        $citaModel = new Cita();
-
-        $occupiedTimes = $citaModel->getOccupiedTimes(
-            (int) $psychologistId,
-            $date
-        );
-
-        // Convierte las horas ocupadas en un conjunto para buscarlas rápidamente.
-        $occupied = [];
-
-        foreach ($occupiedTimes as $time) {
-            $occupied[substr($time, 0, 8)] = true;
-        }
-
-        $availableTimes = [];
-
-        $now = new DateTimeImmutable(
-            'now',
-            $timezone
-        );
-
-        foreach ($availability as $schedule) {
-            $start = DateTimeImmutable::createFromFormat(
-                'H:i:s',
-                $schedule['hora_inicio'],
-                $timezone
-            );
-
-            $end = DateTimeImmutable::createFromFormat(
-                'H:i:s',
-                $schedule['hora_fin'],
-                $timezone
-            );
-
-            if ($start === false || $end === false) {
-                continue;
-            }
-
-            /*
-             * Genera bloques consecutivos de 60 minutos.
-             *
-             * El último bloque solamente se crea si termina
-             * dentro del horario de disponibilidad.
-             */
-            while (true) {
-                $slotEnd = $start->modify(
-                    '+' . self::DURACION_CITA . ' minutes'
-                );
-
-                if ($slotEnd > $end) {
-                    break;
-                }
-
-                $slotTime = $start->format('H:i:s');
-
-                // Para hoy, descarta horas que ya pasaron.
-                $slotDateTime = $selectedDate->setTime(
-                    (int) $start->format('H'),
-                    (int) $start->format('i'),
-                    (int) $start->format('s')
-                );
-
-                if (
-                    $selectedDate == $today &&
-                    $slotDateTime <= $now
-                ) {
-                    $start = $slotEnd;
-                    continue;
-                }
-
-                // No muestra una hora que ya esté reservada.
-                if (!isset($occupied[$slotTime])) {
-                    $availableTimes[] = $slotTime;
-                }
-
-                $start = $slotEnd;
-            }
-        }
-
-        // Elimina posibles duplicados y conserva el orden cronológico.
-        $availableTimes = array_values(
-            array_unique($availableTimes)
-        );
-
-        sort($availableTimes);
-
-        $this->jsonResponse([
-            'ok' => true,
-            'fecha' => $date,
-            'dia_semana' => $dayOfWeek,
-            'duracion_minutos' => self::DURACION_CITA,
-            'horarios' => $availableTimes,
-        ]);
     }
 
     /**
-     * Devuelve una respuesta JSON y finaliza la ejecución.
+     * Registra la solicitud de cita del paciente.
+     */
+    public function solicitarCita(): void
+    {
+        AuthMiddleware::handle();
+        RoleMiddleware::handle([3]);
+
+        $idPsicologo = filter_var(
+            $_POST['id_psi'] ?? null,
+            FILTER_VALIDATE_INT
+        );
+
+        $fecha = trim($_POST['fecha'] ?? '');
+        $hora = trim($_POST['hora'] ?? '');
+
+        $urlCalendario = '/paciente/agendar/calendario?id_psi=' . (int) $idPsicologo;
+
+        if ($idPsicologo === false || $idPsicologo === null || $idPsicologo < 1) {
+            $this->redirectWithError(
+                '/paciente/agendar',
+                'El psicólogo seleccionado no es válido.'
+            );
+        }
+
+        $token = $_POST['_token'] ?? '';
+
+        if (
+            !isset($_SESSION['csrf_token']) ||
+            !is_string($token) ||
+            !hash_equals($_SESSION['csrf_token'], $token)
+        ) {
+            $this->redirectWithError(
+                $urlCalendario,
+                'La solicitud ha caducado. Recarga el calendario e inténtalo nuevamente.'
+            );
+        }
+
+        try {
+            $service = new CitaService();
+
+            $service->solicitarCita(
+                (int) $_SESSION['user']['id'],
+                (int) $idPsicologo,
+                $fecha,
+                $hora
+            );
+
+            $_SESSION['cita_success'] =
+                'Solicitud enviada correctamente. Tu cita está pendiente de confirmación por el psicólogo.';
+
+            header('Location: ' . $urlCalendario);
+            exit;
+        } catch (InvalidArgumentException | RuntimeException $exception) {
+            $this->redirectWithError(
+                $urlCalendario,
+                $exception->getMessage()
+            );
+        } catch (PDOException $exception) {
+            error_log(
+                'No se pudo crear la cita: ' . $exception->getMessage()
+            );
+
+            $this->redirectWithError(
+                $urlCalendario,
+                'No fue posible reservar ese horario. Puede que se haya ocupado; inténtalo nuevamente.'
+            );
+        }
+    }
+
+    /**
+     * Redirige al calendario mostrando un mensaje de error.
+     */
+    private function redirectWithError(
+        string $url,
+        string $message
+    ): void {
+        $_SESSION['cita_errors'] = [$message];
+
+        header('Location: ' . $url);
+        exit;
+    }
+
+    /**
+     * Envía una respuesta JSON.
      */
     private function jsonResponse(
         array $data,
@@ -278,6 +215,7 @@ class CitaController
         http_response_code($statusCode);
 
         header('Content-Type: application/json; charset=UTF-8');
+        header('Cache-Control: no-store, max-age=0');
 
         echo json_encode(
             $data,

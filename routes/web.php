@@ -39,8 +39,26 @@ $router->post(
     [PsychologistController::class, 'deactivateAvailability']
 );
 
+// Muestra los psicólogos activos para iniciar el agendamiento.
+$router->get(
+    '/paciente/agendar',
+    [CitaController::class, 'seleccionarPsicologo']
+);
+
+// Muestra el calendario del psicólogo seleccionado.
+$router->get(
+    '/paciente/agendar/calendario',
+    [CitaController::class, 'mostrarCalendario']
+);
+
 // Consulta dinámicamente los horarios disponibles para una fecha.
 $router->get(
     '/paciente/agendar/horarios',
     [CitaController::class, 'horariosDisponibles']
+);
+
+// Registra la solicitud de cita del paciente.
+$router->post(
+    '/paciente/agendar/solicitar',
+    [CitaController::class, 'solicitarCita']
 );

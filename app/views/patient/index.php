@@ -80,7 +80,7 @@ unset($_SESSION['success']);
         <section class="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
 
             <a
-                href="#"
+                href="/paciente/agendar"
                 class="rounded-2xl bg-white p-6 shadow-sm
                        transition hover:-translate-y-1 hover:shadow-md"
             >

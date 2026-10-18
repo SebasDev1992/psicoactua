@@ -32,6 +32,7 @@ unset($_SESSION['availability_errors']);
         rel="stylesheet"
         href="/assets/css/app.css"
     >
+    <script src="/assets/js/disponibilidad.js" defer></script>
 </head>
 
 <body class="min-h-screen bg-slate-100">
@@ -176,14 +177,19 @@ unset($_SESSION['availability_errors']);
                         Hora de inicio
                     </label>
 
-                    <input
-                        type="time"
+                    <select
                         id="hora_inicio"
                         name="hora_inicio"
                         required
-                        class="mt-1 w-full rounded-lg border
-                               border-slate-300 px-4 py-2"
-                    >
+                        disabled
+                        class="mt-1 w-full rounded-lg border border-slate-300
+                            bg-white px-4 py-3 text-slate-700
+                            outline-none transition
+                            focus:border-cyan-500 focus:ring-4
+                            focus:ring-cyan-500/10
+                            disabled:cursor-not-allowed disabled:bg-slate-100" >
+                        <option value="">Primero selecciona un día</option>
+                    </select>
 
                 </div>
 
@@ -197,14 +203,19 @@ unset($_SESSION['availability_errors']);
                         Hora de finalización
                     </label>
 
-                    <input
-                        type="time"
+                    <select
                         id="hora_fin"
                         name="hora_fin"
                         required
-                        class="mt-1 w-full rounded-lg border
-                               border-slate-300 px-4 py-2"
-                    >
+                        disabled
+                        class="mt-1 w-full rounded-lg border border-slate-300
+                            bg-white px-4 py-3 text-slate-700
+                            outline-none transition
+                            focus:border-cyan-500 focus:ring-4
+                            focus:ring-cyan-500/10
+                            disabled:cursor-not-allowed disabled:bg-slate-100" >
+                        <option value="">Selecciona primero la hora de inicio</option>
+                    </select>
 
                 </div>
 

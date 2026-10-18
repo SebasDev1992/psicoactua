@@ -65,12 +65,12 @@ class PsychologistController
 
         $errors = [];
 
-        // Valida que el día corresponda a lunes hasta sábado.
+        // Valida que el día corresponda de lunes a sábado.
         if ($dayOfWeek < 1 || $dayOfWeek > 6) {
             $errors[] = 'Selecciona un día válido.';
         }
 
-        // Valida que las horas tengan el formato HH:MM esperado.
+        // Valida que las horas tengan el formato HH:MM.
         if (
             !preg_match('/^\d{2}:\d{2}$/', $startTime) ||
             !preg_match('/^\d{2}:\d{2}$/', $endTime)
@@ -80,19 +80,76 @@ class PsychologistController
 
         // Comprueba que las horas sean válidas y que el rango sea correcto.
         if (empty($errors)) {
-            $start = DateTime::createFromFormat('H:i', $startTime);
-            $end = DateTime::createFromFormat('H:i', $endTime);
+            $start = DateTime::createFromFormat('!H:i', $startTime);
+            $startErrors = DateTime::getLastErrors();
 
-            if ($start === false || $end === false) {
+            $end = DateTime::createFromFormat('!H:i', $endTime);
+            $endErrors = DateTime::getLastErrors();
+
+            // Evita aceptar valores de hora que PHP haya normalizado.
+            $startInvalid = (
+                $start === false ||
+                $start->format('H:i') !== $startTime ||
+                (
+                    is_array($startErrors) &&
+                    (
+                        $startErrors['warning_count'] > 0 ||
+                        $startErrors['error_count'] > 0
+                    )
+                )
+            );
+
+            $endInvalid = (
+                $end === false ||
+                $end->format('H:i') !== $endTime ||
+                (
+                    is_array($endErrors) &&
+                    (
+                        $endErrors['warning_count'] > 0 ||
+                        $endErrors['error_count'] > 0
+                    )
+                )
+            );
+
+            if ($startInvalid || $endInvalid) {
                 $errors[] = 'Las horas seleccionadas no son válidas.';
             } elseif ($start >= $end) {
                 $errors[] = 'La hora de inicio debe ser menor que la hora de fin.';
             }
         }
 
-        // Si los datos básicos son inválidos, detiene el proceso.
+        /*
+         * Aplica la jornada laboral del consultorio.
+         *
+         * Lunes a viernes: 06:00–18:00.
+         * Sábados:         07:00–14:00.
+         *
+         * Los límites son inclusivos: se permite que un horario
+         * termine exactamente a las 18:00 o a las 14:00.
+         */
+        if (empty($errors)) {
+            $horaInicioLaboral = $dayOfWeek === 6
+                ? '07:00'
+                : '06:00';
+
+            $horaFinLaboral = $dayOfWeek === 6
+                ? '14:00'
+                : '18:00';
+
+            if (
+                $startTime < $horaInicioLaboral ||
+                $endTime > $horaFinLaboral
+            ) {
+                $errors[] = $dayOfWeek === 6
+                    ? 'Los sábados, el horario debe estar entre las 7:00 AM y las 2:00 PM.'
+                    : 'De lunes a viernes, el horario debe estar entre las 6:00 AM y las 6:00 PM.';
+            }
+        }
+
+        // Detiene el proceso si alguna validación ha fallado.
         if (!empty($errors)) {
             $_SESSION['availability_errors'] = $errors;
+
             header('Location: /psicologo/disponibilidad');
             exit;
         }
