@@ -59,10 +59,33 @@ class PatientController
         // Obtiene el usuario actual desde la sesión.
         $userId = (int) $_SESSION['user']['id'];
 
-        // Recibe y normaliza los datos enviados por el formulario.
+        // Recibe y normaliza los datos enviados por el formulario.//trim() quita espacios innecesarios al principio y al final del texto.
         $fechaNacimiento = trim($_POST['fecha_nac'] ?? '');
         $genero = trim($_POST['genero'] ?? '');
+        $generoOtro = trim($_POST['genero_otro'] ?? '');
         $direccion = trim($_POST['direccion'] ?? '');
+        $generosPermitidos = [
+            'Masculino',
+            'Femenino',
+            'No binario',
+            'Otro',
+            'Prefiero no responder',
+        ];
+        //Si el género no está vacío y además no está dentro de las opciones permitidas, rechazarlo.
+        if ($genero !== '' && !in_array($genero, $generosPermitidos, true)) {
+            $_SESSION['error'] = 'La opción de género seleccionada no es válida.';
+            header('Location: /paciente/perfil');
+            exit;
+        }
+        if ($genero === 'Otro') {
+            if ($generoOtro === '') {
+                $_SESSION['error'] = 'Debes especificar tu género.';
+                header('Location: /paciente/perfil');
+                exit;
+            }
+
+            $genero = $generoOtro;
+        }
 
         // Convierte los campos vacíos en NULL.
         $fechaNacimiento = $fechaNacimiento !== '' ? $fechaNacimiento : null;

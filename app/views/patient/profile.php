@@ -5,6 +5,22 @@
  * @var array $patient
  */
 ?>
+<?php
+$generosPermitidos = [
+    'Masculino',
+    'Femenino',
+    'No binario',
+    'Otro',
+    'Prefiero no responder',
+];
+
+$generoActual = $patient['genero'] ?? '';
+
+$esGeneroOtro = (
+    $generoActual !== '' &&
+    !in_array($generoActual, $generosPermitidos, true)
+);
+?>
 
 <!DOCTYPE html>
 <html lang="es">
@@ -150,26 +166,83 @@
                 >
                 </div>
 
-                    <div>
-                <label
-                            for="genero"
-                            class="text-sm font-medium text-slate-500"
-                >
-                            Género
-                </label>
+                <div>
+                    <label
+                        for="genero"
+                        class="text-sm font-medium text-slate-500"
+                        >
+                        Género
+                    </label>
 
-                        <input
-                            type="text"
-                            id="genero"
-                            name="genero"
-                            value="<?= htmlspecialchars(
-                                $patient['genero'] ?? '',
-                                ENT_QUOTES,
-                                'UTF-8'
-                            ) ?>"
-                            class="mt-1 w-full rounded-lg border border-slate-300
-                                px-4 py-2 text-slate-900"
-                >
+                    <select
+                        id="genero"
+                        name="genero"
+                        class="mt-1 w-full rounded-lg border border-slate-300
+                            px-4 py-2 text-slate-900"
+                            >
+                        <option value="">Selecciona una opción</option>
+
+                        <option
+                            value="Masculino"
+                            <?= ($patient['genero'] ?? '') === 'Masculino' ? 'selected' : '' ?>
+                            >
+                            Masculino
+                        </option>
+
+                        <option
+                            value="Femenino"
+                            <?= ($patient['genero'] ?? '') === 'Femenino' ? 'selected' : '' ?>
+                            >
+                            Femenino
+                        </option>
+
+                        <option
+                            value="No binario"
+                            <?= ($patient['genero'] ?? '') === 'No binario' ? 'selected' : '' ?>
+                            >
+                            No binario
+                        </option>
+
+                        <option
+                        value="Otro"
+                        <?= (($patient['genero'] ?? '') === 'Otro' || $esGeneroOtro ) ? 'selected' : '' ?>
+                        >
+                        Otro
+                        </option>
+
+                        <option
+                            value="Prefiero no responder"
+                            <?= ($patient['genero'] ?? '') === 'Prefiero no responder' ? 'selected' : '' ?>
+                        >
+                            Prefiero no responder
+                        </option>
+                    </select>
+                    <div
+                    id="campoGeneroOtro"
+                    class="mt-3 hidden"
+                    >
+                    <label
+                        for="genero_otro"
+                        class="text-sm font-medium text-slate-500"
+                    >
+                        Especifica tu género
+                    </label>
+
+                    <input
+                        type="text"
+                        id="genero_otro"
+                        name="genero_otro"
+                        maxlength="100"
+                        value="<?= htmlspecialchars(
+                            $esGeneroOtro ? $generoActual : '',
+                            ENT_QUOTES,
+                            'UTF-8'
+                        ) ?>"
+                        class="mt-1 w-full rounded-lg border border-slate-300
+                            px-4 py-2 text-slate-900"
+                        placeholder="Escribe cómo deseas identificarte"
+                    >
+                </div>
                 </div>
 
                     <div class="md:col-span-2">
@@ -206,6 +279,32 @@
             </form>
 
     </main>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const genero = document.querySelector('#genero');
+        const campoGeneroOtro = document.querySelector('#campoGeneroOtro');
+        const generoOtro = document.querySelector('#genero_otro');
+
+        if (!genero || !campoGeneroOtro || !generoOtro) {
+            return;
+        }
+
+        const actualizarGeneroOtro = () => {
+            const esOtro = genero.value === 'Otro';
+
+            campoGeneroOtro.classList.toggle('hidden', !esOtro);
+            generoOtro.required = esOtro;
+
+            if (!esOtro) {
+                generoOtro.value = '';
+            }
+        };
+
+        genero.addEventListener('change', actualizarGeneroOtro);
+
+        actualizarGeneroOtro();
+    });
+    </script>
 
 </body>
 </html>
