@@ -69,7 +69,8 @@ $user = $_SESSION['user'];
 
         <section class="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
 
-            <a href="#" class="rounded-2xl bg-white p-6 shadow-sm">
+            <!-- Permite acceder a la agenda de citas del psicólogo. -->
+            <a href="/psicologo/agenda" class="rounded-2xl bg-white p-6 shadow-sm">
                 <h3 class="text-lg font-semibold">
                     Mi agenda
                 </h3>

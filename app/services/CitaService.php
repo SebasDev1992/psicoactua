@@ -261,6 +261,67 @@ class CitaService
     }
 
     /**
+     * Obtiene la agenda del psicólogo.
+     */
+    public function obtenerAgendaPsicologo(int $idUsuario): array
+    {
+        $psychologistModel = new Psychologist();
+
+        $psicologo = $psychologistModel->findByUserId($idUsuario);
+
+        if ($psicologo === null) {
+            throw new RuntimeException(
+                'No se encontró el perfil del psicólogo.'
+            );
+        }
+
+        $citaModel = new Cita();
+
+        return $citaModel->getByPsychologistId(
+            (int) $psicologo['id_psi']
+        );
+    }
+
+    /**
+     * Actualiza el estado de una cita del psicólogo.
+     */
+    public function actualizarEstadoCita(
+        int $idUsuario,
+        int $idCita,
+        string $estado
+    ): void {
+        if (!in_array($estado, ['confirmada', 'cancelada'], true)) {
+            throw new InvalidArgumentException(
+                'El estado de la cita no es válido.'
+            );
+        }
+
+        $psychologistModel = new Psychologist();
+
+        $psicologo = $psychologistModel->findByUserId($idUsuario);
+
+        if ($psicologo === null) {
+            throw new RuntimeException(
+                'No se encontró el perfil del psicólogo.'
+            );
+        }
+
+        $citaModel = new Cita();
+
+        $actualizada = $citaModel->updateStatus(
+            $idCita,
+            (int) $psicologo['id_psi'],
+            $estado
+        );
+
+        if (!$actualizada) {
+            throw new RuntimeException(
+                'La cita no existe, no pertenece a este psicólogo o ya fue gestionada.'
+            );
+        }
+    }
+
+    /**
      * Valida una fecha dentro del periodo permitido.
      */
     private function validarFecha(

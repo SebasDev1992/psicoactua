@@ -2,6 +2,7 @@
 
 require_once __DIR__ . '/../models/Psychologist.php';
 require_once __DIR__ . '/../models/Availability.php';
+require_once __DIR__ . '/../services/CitaService.php';
 require_once __DIR__ . '/../middleware/AuthMiddleware.php';
 require_once __DIR__ . '/../middleware/RoleMiddleware.php';
 
@@ -19,6 +20,80 @@ class PsychologistController
         RoleMiddleware::handle([2]);
 
         require_once __DIR__ . '/../views/psychologist/index.php';
+    }
+
+    /**
+     * Muestra la agenda del psicólogo autenticado.
+     */
+    public function agenda(): void
+    {
+        AuthMiddleware::handle();
+        RoleMiddleware::handle([2]);
+
+        $userId = (int) $_SESSION['user']['id'];
+
+        if (empty($_SESSION['csrf_token'])) {
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        }
+
+        $citaService = new CitaService();
+
+        try {
+            $citas = $citaService->obtenerAgendaPsicologo($userId);
+        } catch (RuntimeException $e) {
+            http_response_code(404);
+            exit($e->getMessage());
+        }
+
+        require_once __DIR__ . '/../views/psychologist/agenda.php';
+    }
+
+    /**
+     * Actualiza el estado de una cita desde la agenda.
+     */
+    public function actualizarEstadoCita(): void
+    {
+        AuthMiddleware::handle();
+        RoleMiddleware::handle([2]);
+
+        $token = $_POST['_token'] ?? '';
+
+        if (
+            empty($_SESSION['csrf_token']) ||
+            !hash_equals($_SESSION['csrf_token'], $token)
+        ) {
+            http_response_code(403);
+            exit('Solicitud no válida.');
+        }
+
+        $userId = (int) $_SESSION['user']['id'];
+        $idCita = (int) ($_POST['id_cita'] ?? 0);
+        $estado = trim($_POST['estado'] ?? '');
+
+        if ($idCita <= 0) {
+            $_SESSION['error'] = 'La cita seleccionada no es válida.';
+            header('Location: /psicologo/agenda');
+            exit;
+        }
+
+        $citaService = new CitaService();
+
+        try {
+            $citaService->actualizarEstadoCita(
+                $userId,
+                $idCita,
+                $estado
+            );
+
+            $_SESSION['success'] = $estado === 'confirmada'
+                ? 'Cita confirmada correctamente.'
+                : 'Cita cancelada correctamente.';
+        } catch (InvalidArgumentException | RuntimeException $e) {
+            $_SESSION['error'] = $e->getMessage();
+        }
+
+        header('Location: /psicologo/agenda');
+        exit;
     }
 
     /**

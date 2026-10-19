@@ -133,4 +133,60 @@ class Cita extends Model
 
         return (int) $this->database->lastInsertId();
     }
+
+    /**
+     * Obtiene las citas del psicólogo con los datos del paciente.
+     */
+    public function getByPsychologistId(int $idPsicologo): array
+    {
+        $sql = "
+            SELECT
+                c.id_cita,
+                c.fecha,
+                c.hora,
+                c.estado,
+                u.nom,
+                u.ape
+            FROM citas AS c
+            INNER JOIN pacientes AS p
+                ON p.id_pac = c.id_pac
+            INNER JOIN users AS u
+                ON u.id_user = p.id_user
+            WHERE c.id_psi = :id_psi
+            ORDER BY c.fecha ASC, c.hora ASC
+        ";
+
+        $stmt = $this->database->prepare($sql);
+        $stmt->execute([
+            ':id_psi' => $idPsicologo
+        ]);
+
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Actualiza el estado de una cita pendiente.
+     */
+    public function updateStatus(
+        int $idCita,
+        int $idPsicologo,
+        string $estado
+    ): bool {
+        $sql = "
+            UPDATE citas
+            SET estado = :estado
+            WHERE id_cita = :id_cita
+            AND id_psi = :id_psi
+            AND estado = 'pendiente'
+        ";
+
+        $stmt = $this->database->prepare($sql);
+        $stmt->execute([
+            ':estado' => $estado,
+            ':id_cita' => $idCita,
+            ':id_psi' => $idPsicologo
+        ]);
+
+        return $stmt->rowCount() > 0;
+    }
 }
